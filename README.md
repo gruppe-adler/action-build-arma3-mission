@@ -1,105 +1,92 @@
-<p align="center">
-  <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
-</p>
+# action-build-arma3-mission
 
-# Create a JavaScript Action using TypeScript
+This action builds your Arma 3 mission to a PBO. You could then use that and attach it as an artifact or to a release.
 
-Use this template to bootstrap the creation of a TypeScript action.:rocket:
+## Inputs
+### `path`
+This input is optional (Default: current directory = `.`)  
+Relative path to mission directory.
 
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.  
+### `pack_only`
+This input is optional (Default: `false`)  
+Only pack into a PBO without any binarization or rapification.
 
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
+### `armake_verbose`
+This input is optional (Default: `false`)  
+Armake option `--verbose`. _Enable verbose output._
 
-## Create an action from this template
+### `armake_force`
+This input is optional (Default: `true`)  
+Armake option `--force`. _Overwrite the target file/folder if it already exists._
 
-Click the `Use this Template` and provide the new repo details for your action
+### `armake_signature`
+This input is optional (Default: none)  
+Armake option `--signature`. _Signature path to use when signing the PBO._
 
-## Code in Main
+### `armake_header_exts`
+This input is optional (Default: none)  
+Armake option `--headerext`. _Extension to add to PBO header._
 
-> First, you'll need to have a reasonably modern version of `node` handy. This won't work with versions older than 9, for instance.
+### `armake_private_key`
+This input is optional (Default: none)  
+Armake option `--key`. _Sign the PBO with the given private key._
 
-Install the dependencies  
-```bash
-$ npm install
-```
+## Outputs
 
-Build the typescript and package it for distribution
-```bash
-$ npm run build && npm run package
-```
+### `pbo_path`
+Relative path of built PBO.
 
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
+### `pbo_name`
+Name of built PBO.
 
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
+## Example usage
 
-...
-```
-
-## Change action.yml
-
-The action.yml defines the inputs and output for your action.
-
-Update the action.yml with your name, description, inputs and outputs for your action.
-
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
-
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-import * as core from '@actions/core';
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-run()
-```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Publish to a distribution branch
-
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
-
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
-```bash
-$ npm run package
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
-```
-
-Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Validate
-
-You can now validate the action by referencing `./` in a workflow in your repo (see [test.yml](.github/workflows/test.yml))
-
+### Minimal example
 ```yaml
-uses: ./
-with:
-  milliseconds: 1000
+name: 'CI'
+
+on:
+  push:
+
+jobs:
+  build-mission:
+    name: 'Build Arma 3 Mission'
+    runs-on: ubuntu-latest # or windows-latest
+    steps:
+    - uses: actions/checkout@master
+
+    - uses: gruppe-adler/action-build-arma3-mission@v1-beta
+      id: build
+
+    - uses: actions/upload-artifact@master
+      with:
+        name: ${{ steps.build.outputs.pbo_name }}
+        path: ${{ steps.build.outputs.pbo_path }}
 ```
 
-See the [actions tab](https://github.com/actions/typescript-action/actions) for runs of this action! :rocket:
+### Example with all options
+```yaml
+# [...]
 
-## Usage:
+    - uses: gruppe-adler/action-build-arma3-mission@v1-beta
+      with:
+        path: './path/to/my/mission/directory'
+        pack_only: false
+        armake_verbose: true
+        armake_force: false
+        armake_signature: './path/to/my/signature.bisign'
+        armake_private_key: './path/to/my/private_key.bikey'
+        armake_header_exts:
+          header1: value1
+          header2: value2
+          header3: value3
 
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action
+# [...]
+```
+
+## License
+The scripts and documentation in this project are released under the [MIT License](LICENSE)
+
+## Contributing
+You can run everything (`test`, `lint`, `build` & `package`) with `npm run all`.  
+Make sure commit the `./dist` directory!!

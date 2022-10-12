@@ -1,11 +1,40 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Build Arma 3 Mission'
+description: 'This action builds your Arma 3 mission to a PBO. You could then use that and attach it as an artifact or to a release.'
+author: 'gruppe-adler'
 inputs:
-  milliseconds: # change this
-    required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    path:
+        description: 'Relative path to mission directory'
+        required: false
+        default: '.'
+    pack_only:
+        description: 'Only pack into a PBO without any binarization or rapification.'
+        required: false
+        default: false
+    armake_verbose:
+        description: '[Armake option] Enable verbose output.'
+        required: false
+        default: false
+    armake_force:
+        description: '[Armake option] Overwrite the target file/folder if it already exists.'
+        required: false
+        default: true
+    armake_signature:
+        description: '[Armake option] Signature path to use when signing the PBO.'
+        required: false
+    armake_header_exts:
+        description: '[Armake option] Extension to add to PBO header.'
+        required: false
+    armake_private_key:
+        description: '[Armake option] Sign the PBO with the given private key.'
+        required: false
+    # TODO: Add armake exclude option
+    # TODO: Add armake disabledWarnings option
+    # TODO: Add armake includeDir option
+outputs:
+    pbo_path:
+        description: 'Relative path of built PBO.'
+    pbo_name:
+        description: 'Name of built PBO.'
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+    using: 'node16'
+    main: 'dist/index.js'
